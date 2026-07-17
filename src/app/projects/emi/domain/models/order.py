@@ -38,3 +38,6 @@ class OrderPublic(BaseModel):
     total: float
     estado: OrderStatus
     creado_en: datetime
+
+class OrderStatusUpdate(BaseModel):
+    estado: OrderStatus

@@ -18,3 +18,11 @@ class OrderRepository:
         if not ObjectId.is_valid(order_id):
             return None
         return await self.collection.find_one({"_id": ObjectId(order_id)})
+    
+    async def update_status(self, order_id: str, nuevo_estado: str) -> None:
+        await self.collection.update_one(
+            {"_id": ObjectId(order_id)},
+            {"$set": {"estado": nuevo_estado}},
+        )
+
+        

@@ -47,3 +47,8 @@ class OrderService:
     async def get_order(self, order_id: str) -> OrderPublic | None:
         doc = await self.order_repo.get_by_id(order_id)
         return _to_public(doc) if doc else None
+    
+    async def update_status(self, order_id: str, nuevo_estado: str) -> OrderPublic:
+        await self.order_repo.update_status(order_id, nuevo_estado)
+        doc = await self.order_repo.get_by_id(order_id)
+        return _to_public(doc)

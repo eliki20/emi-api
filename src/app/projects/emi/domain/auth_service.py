@@ -24,7 +24,7 @@ class AuthService:
         )
         user_id = await self.user_repo.create(user)
 
-        public = UserPublic(id=user_id, nombre=user.nombre, correo=user.correo)
+        public = UserPublic(id=user_id, nombre=user.nombre, correo=user.correo, rol=user.rol)
         token = create_access_token(user_id, user.correo)
         return public, token
 
@@ -34,7 +34,12 @@ class AuthService:
             raise InvalidCredentialsError("Correo o contraseña incorrectos")
 
         user_id = str(doc["_id"])
-        public = UserPublic(id=user_id, nombre=doc["nombre"], correo=doc["correo"])
+        public = UserPublic(
+            id=user_id,
+            nombre=doc["nombre"],
+            correo=doc["correo"],
+            rol=doc.get("rol", "cliente"),
+        )
         token = create_access_token(user_id, doc["correo"])
         return public, token
 
@@ -52,11 +57,16 @@ class AuthService:
         existing = await self.user_repo.get_by_email(correo)
         if existing:
             user_id = str(existing["_id"])
-            public = UserPublic(id=user_id, nombre=existing["nombre"], correo=existing["correo"])
+            public = UserPublic(
+                id=user_id,
+                nombre=existing["nombre"],
+                correo=existing["correo"],
+                rol=existing.get("rol", "cliente"),
+            )
         else:
             user = UserInDB(nombre=nombre, correo=correo, password_hash="google_oauth_no_password")
             user_id = await self.user_repo.create(user)
-            public = UserPublic(id=user_id, nombre=nombre, correo=correo)
+            public = UserPublic(id=user_id, nombre=nombre, correo=correo, rol=user.rol)
 
         token = create_access_token(user_id, correo)
         return public, token
