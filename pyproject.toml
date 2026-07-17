@@ -1,0 +1,48 @@
+[project]
+name = "emi-api"
+version = "0.1.0"
+description = "EMI - Libreria inteligente de utiles escolares"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.116.1",
+    "uvicorn[standard]>=0.35.0",
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.11.0",
+    "email-validator>=2.2.0",
+    "httpx>=0.28.1",
+    "pymongo>=4.15.0",
+    "motor>=3.7.1",
+    "pyjwt[crypto]>=2.10.1",
+    "passlib>=1.7.4",
+    "bcrypt==4.0.1",
+    "python-multipart>=0.0.20",
+    "orjson>=3.11.3",
+    "google-auth>=2.55.2",
+    "requests>=2.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "ruff>=0.13.2",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.uv]
+package = true
