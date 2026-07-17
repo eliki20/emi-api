@@ -1,16 +1,13 @@
-import os
-import google.generativeai as genai
-from dotenv import load_dotenv
+from google import genai
 
-load_dotenv("credentials/emi.env")
+from app.projects.emi.infra.settings import settings
 
-genai.configure(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
-
-model = genai.GenerativeModel("gemini-3.5-flash")
+client = genai.Client(api_key=settings.gemini_api_key)
 
 
 async def generate_response(prompt: str) -> str:
-    response = await model.generate_content_async(prompt)
+    response = await client.aio.models.generate_content(
+        model="gemini-3.5-flash",
+        contents=prompt,
+    )
     return response.text
