@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 from app.projects.emi.domain.models.user import UserPublic
 
@@ -23,3 +24,8 @@ class GoogleLoginRequest(BaseModel):
 
 class DeviceTokenRequest(BaseModel):
     fcm_token: str
+
+class MensajeHistorial(BaseModel):
+    pregunta: str
+    respuesta: str
+    creado_en: datetime

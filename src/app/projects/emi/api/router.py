@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.projects.emi.api.deps import get_auth_service
-from app.projects.emi.api.schemas import AuthResponse
+from app.projects.emi.api.schemas import AuthResponse, MensajeHistorial
 from app.projects.emi.domain.auth_service import AuthService
 from app.projects.emi.domain.exceptions import EmailAlreadyExistsError, InvalidCredentialsError
 from app.projects.emi.domain.models.user import UserCreate, UserLogin
@@ -110,9 +110,10 @@ async def obtener_pedido(
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
     data: ChatRequest,
+    usuario_id: str = Depends(get_current_user_id),
     chat_service: ChatService = Depends(get_chat_service),
 ):
-    respuesta = await chat_service.ask(data.pregunta)
+    respuesta = await chat_service.ask(usuario_id, data.pregunta)
     return ChatResponse(respuesta=respuesta)
 
 @router.post("/google-login", response_model=AuthResponse)
@@ -143,3 +144,10 @@ async def registrar_device_token(
 ):
     await repo.upsert(usuario_id, data.fcm_token)
     return {"status": "ok"}
+
+@router.get("/chat/historial", response_model=list[MensajeHistorial])
+async def obtener_historial_chat(
+    usuario_id: str = Depends(get_current_user_id),
+    chat_service: ChatService = Depends(get_chat_service),
+):
+    return await chat_service.obtener_historial(usuario_id)

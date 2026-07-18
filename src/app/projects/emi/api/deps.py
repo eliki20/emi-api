@@ -9,7 +9,7 @@ from app.projects.emi.infra.repositories.order_repo import OrderRepository
 from app.projects.emi.domain.order_service import OrderService
 from app.projects.emi.domain.chat_service import ChatService
 from app.projects.emi.infra.repositories.device_token_repo import DeviceTokenRepository
-
+from app.projects.emi.infra.repositories.chat_repo import ChatRepository
 
 def get_db() -> AsyncIOMotorDatabase:
     return get_database()
@@ -35,3 +35,7 @@ def get_chat_service() -> ChatService:
 def get_device_token_repo() -> DeviceTokenRepository:
     db = get_db()
     return DeviceTokenRepository(db)
+
+def get_chat_service() -> ChatService:
+    db = get_db()
+    return ChatService(ProductRepository(db), ChatRepository(db))
