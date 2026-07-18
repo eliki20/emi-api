@@ -8,7 +8,7 @@ from app.projects.emi.domain.product_service import ProductService
 from app.projects.emi.infra.repositories.order_repo import OrderRepository
 from app.projects.emi.domain.order_service import OrderService
 from app.projects.emi.domain.chat_service import ChatService
-
+from app.projects.emi.infra.repositories.device_token_repo import DeviceTokenRepository
 
 
 def get_db() -> AsyncIOMotorDatabase:
@@ -26,8 +26,12 @@ def get_product_service() -> ProductService:
 
 def get_order_service() -> OrderService:
     db = get_db()
-    return OrderService(OrderRepository(db), ProductRepository(db))
+    return OrderService(OrderRepository(db), ProductRepository(db), DeviceTokenRepository(db))
 
 def get_chat_service() -> ChatService:
     db = get_db()
     return ChatService(ProductRepository(db))
+
+def get_device_token_repo() -> DeviceTokenRepository:
+    db = get_db()
+    return DeviceTokenRepository(db)

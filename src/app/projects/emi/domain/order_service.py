@@ -1,8 +1,10 @@
 from app.projects.emi.domain.exceptions import EmptyOrderError, StockInsuficienteError
 from app.projects.emi.domain.models.order import OrderCreate, OrderInDB, OrderPublic
+from app.projects.emi.infra.clients.firebase import send_push
+from app.projects.emi.infra.repositories.device_token_repo import DeviceTokenRepository
 from app.projects.emi.infra.repositories.order_repo import OrderRepository
 from app.projects.emi.infra.repositories.product_repo import ProductRepository
-
+from app.projects.emi.infra.clients.firebase import send_push
 
 def _to_public(doc: dict) -> OrderPublic:
     return OrderPublic(
@@ -16,9 +18,15 @@ def _to_public(doc: dict) -> OrderPublic:
 
 
 class OrderService:
-    def __init__(self, order_repo: OrderRepository, product_repo: ProductRepository):
+    def __init__(
+        self,
+        order_repo: OrderRepository,
+        product_repo: ProductRepository,
+        device_token_repo: DeviceTokenRepository | None = None,
+    ):
         self.order_repo = order_repo
         self.product_repo = product_repo
+        self.device_token_repo = device_token_repo
 
     async def create_order(self, usuario_id: str, data: OrderCreate) -> OrderPublic:
         if not data.items:
@@ -47,8 +55,19 @@ class OrderService:
     async def get_order(self, order_id: str) -> OrderPublic | None:
         doc = await self.order_repo.get_by_id(order_id)
         return _to_public(doc) if doc else None
-    
+
     async def update_status(self, order_id: str, nuevo_estado: str) -> OrderPublic:
         await self.order_repo.update_status(order_id, nuevo_estado)
         doc = await self.order_repo.get_by_id(order_id)
-        return _to_public(doc)
+        public = _to_public(doc)
+
+        if self.device_token_repo:
+            fcm_token = await self.device_token_repo.get_token(public.usuario_id)
+            if fcm_token:
+                await send_push(
+                    fcm_token=fcm_token,
+                    title="EMI - Actualización de pedido",
+                    body=f"Tu pedido #{public.id[-6:]} ahora está: {nuevo_estado}",
+                )
+
+        return public

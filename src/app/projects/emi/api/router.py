@@ -19,7 +19,10 @@ from app.projects.emi.api.schemas import ChatRequest, ChatResponse
 from app.projects.emi.api.schemas import GoogleLoginRequest
 from app.projects.emi.api.auth import get_current_admin_user
 from app.projects.emi.domain.models.order import OrderStatusUpdate
-
+from app.projects.emi.api.deps import get_device_token_repo
+from app.projects.emi.api.schemas import DeviceTokenRequest
+from app.projects.emi.infra.repositories.device_token_repo import DeviceTokenRepository
+from app.projects.emi.api.auth import get_current_user_id
 
 router = APIRouter(tags=["emi"])
 
@@ -131,3 +134,12 @@ async def actualizar_estado_pedido(
     if not order:
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
     return order
+
+@router.post("/device-token")
+async def registrar_device_token(
+    data: DeviceTokenRequest,
+    usuario_id: str = Depends(get_current_user_id),
+    repo: DeviceTokenRepository = Depends(get_device_token_repo),
+):
+    await repo.upsert(usuario_id, data.fcm_token)
+    return {"status": "ok"}

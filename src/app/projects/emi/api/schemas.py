@@ -19,3 +19,7 @@ class ChatResponse(BaseModel):
 
 class GoogleLoginRequest(BaseModel):
     id_token: str
+
+
+class DeviceTokenRequest(BaseModel):
+    fcm_token: str
