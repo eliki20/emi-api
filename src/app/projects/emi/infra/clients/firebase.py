@@ -1,4 +1,5 @@
 import asyncio
+import os
 from typing import Optional
 
 import firebase_admin
@@ -6,9 +7,8 @@ from firebase_admin import credentials, messaging
 
 from app.projects.emi.infra.settings import ENV_PATH
 
-_cred_path = ENV_PATH.parent / "emi-firebase-adminsdk.json"  # confírmame el nombre exacto
-_app = firebase_admin.initialize_app(credentials.Certificate(str(_cred_path)), name="emi")
-
+_cred_path = os.getenv("FIREBASE_CRED_PATH") or str(ENV_PATH.parent / "emi-firebase-adminsdk.json")
+_app = firebase_admin.initialize_app(credentials.Certificate(_cred_path), name="emi")
 
 async def send_push(
     fcm_token: str,
@@ -24,6 +24,5 @@ async def send_push(
     try:
         return await asyncio.to_thread(messaging.send, message, app=_app)
     except Exception as e:
-        # Token inválido/expirado (dispositivo desinstaló la app, token rotó, etc.)
         print(f"Error enviando push FCM: {e}")
         return None
