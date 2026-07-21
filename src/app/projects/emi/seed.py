@@ -1,5 +1,6 @@
 import asyncio
 
+from app.projects.emi.infra.clients.embedding import generate_embedding
 from app.projects.emi.infra.db.mongo import get_database
 
 PRODUCTOS_RAW = [
@@ -69,12 +70,30 @@ PRODUCTOS_RAW = [
 
 PRODUCTOS = PRODUCTOS_RAW
 
+
+def _texto_para_embedding(p: dict) -> str:
+    return f"{p['nombre']} {p.get('marca', '')} {p['categoria']} {p.get('descripcion', '')}"
+
+
+async def _con_embedding(p: dict) -> dict:
+    texto = _texto_para_embedding(p)
+    embedding = await generate_embedding(texto)
+    return {**p, "embedding": embedding}
+
+
 async def main():
     db = get_database()
     collection = db["productos"]
     await collection.delete_many({})
-    result = await collection.insert_many(PRODUCTOS)
-    print(f"✅ {len(result.inserted_ids)} productos insertados")
+
+    productos_con_embedding = []
+    for p in PRODUCTOS:
+        producto = await _con_embedding(p)
+        productos_con_embedding.append(producto)
+        print(f"embedding calculado: {p['nombre']} ({p.get('marca')})")
+
+    result = await collection.insert_many(productos_con_embedding)
+    print(f"✅ {len(result.inserted_ids)} productos insertados con embedding")
 
 
 asyncio.run(main())

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60
     google_client_id: str
     gemini_api_key: str
+    gemini_model: str
 
     model_config = SettingsConfigDict(
         env_file=ENV_PATH,
